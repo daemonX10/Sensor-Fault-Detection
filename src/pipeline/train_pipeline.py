@@ -23,10 +23,5 @@ class TrainPipeline:
             
             r2_square = self.model_trainer.initiate_model_trainer(train_array=train_arr,test_array=test_arr,preprocessor_path=preprocessor_file_path)
             logging.info("training completed. Trained model score : "+str(r2_square))
-            
-            
         except Exception as e:
             raise CustomException(e,sys)
-        
-object = TrainPipeline()
-object.run_pipeline()
