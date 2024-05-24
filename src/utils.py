@@ -1,5 +1,7 @@
 import os , sys
 import dill
+# Set the LOKY_MAX_CPU_COUNT environment variable
+LOKY_MAX_CPU_COUNT = 4
 import numpy as np
 import boto3
 from src.exception import CustomException 

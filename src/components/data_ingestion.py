@@ -22,10 +22,10 @@ class DataIngestion:
         
     def initiate_data_ingestion(self):
         logging.info("Entered initiate_data_ingestion method of DataIngestion class")
-        
+        print(os.getcwd())
         try:
-            print(MONGO_COLLECTION_NAME,MONGO_DATABASE_NAME)
             df:pd.DataFrame = export_collection_as_dataframe(db_name=MONGO_DATABASE_NAME,collection_name=MONGO_COLLECTION_NAME)
+
             logging.info("Exported collection as dataframe")
             
             os.makedirs(os.path.dirname(self.ingestion_config.train_data_path),exist_ok=True)
@@ -38,14 +38,9 @@ class DataIngestion:
             
             test_set.to_csv(self.ingestion_config.test_data_path,index=False,header=True)
             
-            logging.info(f"Ingested data from mongodb to {self.ingestion_config.raw_data_path}")
-            
             logging.info("Exited initiate_data_ingestion method of DataIngestion class")
             
             return (self.ingestion_config.train_data_path,self.ingestion_config.test_data_path)
         
         except Exception as e:
-            raise CustomException(e,sys)
-        
-object = DataIngestion()
-object.initiate_data_ingestion()
+            raise CustomException(e,sys)    

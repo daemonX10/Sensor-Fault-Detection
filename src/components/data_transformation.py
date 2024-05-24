@@ -7,12 +7,12 @@ from src.exception import CustomException
 from src.logger import logging
 from src.utils import save_object
 
-from sklearn.compose import ColumnTransformer
 from imblearn.combine import SMOTETomek
+from imblearn.over_sampling import SMOTE
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import RobustScaler, FunctionTransformer
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
 
 @dataclass
 class DataTransformationConfig:
@@ -24,8 +24,9 @@ class DataTransformation:
     
     def get_data_transformer_object(self):
         try:
+            logging.info("Entered get_data_transformer_object method of DataTransformation class")
             # define custom function to replace 'NA' with np.nan
-            replace_na_with_nan = lambda X : np.where(X == 'na', np.nan, X)
+            replace_na_with_nan = lambda X : np.where(X.isin(['na', 'NaN','NaN.']), np.nan, X)
             
             # define the steps for the preprocessor pipeline
             nan_replacement_step = ('nan_replacement',FunctionTransformer(replace_na_with_nan))
@@ -34,7 +35,7 @@ class DataTransformation:
             scaler_step = ('scaler',RobustScaler())
             
             preprocessor = Pipeline(
-                step = [
+                steps = [
                     nan_replacement_step,
                     imputer_step,
                     scaler_step
@@ -47,26 +48,32 @@ class DataTransformation:
     
     def initiate_data_transformation (self,train_path,test_path):
         try:
-            train_df = pd.read_csv(train_path)
-            test_df = pd.read_csv(test_path)
+            logging.info("Entered initiate_data_transformation method of DataTransformation class")
+            train_df = pd.read_csv(train_path).drop(columns='Unnamed: 0')
+            test_df = pd.read_csv(test_path).drop(columns='Unnamed: 0')
             
-            logging.info("creating preprocessor")
+            ## Drop rows where "Good/Bad" is NaN
+            train_df = train_df.dropna(subset=['Good/Bad'])
+            test_df = test_df.dropna(subset=['Good/Bad'])
+            
             preprocessor = self.get_data_transformer_object()
             
-            target_column_name = "class"
-            target_column_mapping = {'+1':0,'-1':1}
+            target_column_name = "Good/Bad"
+            target_column_mapping = {1:0,-1:1}
             
-            input_feature_train_df = train_df.drop(columns=[target_column_name],axis=1)
             target_feature_train_df = train_df[target_column_name].map(target_column_mapping)
             
-            input_feature_test_df = test_df.drop(columns=[target_column_name],axis=1)
+            input_feature_train_df = train_df.drop(columns=[target_column_name],axis=1)
+            
             target_feature_test_df = test_df[target_column_name].map(target_column_mapping)
+            
+            input_feature_test_df = test_df.drop(columns=[target_column_name],axis=1)
             
             transformed_input_train_feature = preprocessor.fit_transform(input_feature_train_df)
             
             transformed_input_test_feature = preprocessor.transform(input_feature_test_df)
             
-            smt = SMOTETomek(sampling_strategy='minority')
+            smt = SMOTETomek(sampling_strategy='minority', smote=SMOTE(k_neighbors=1))  # reduce the number of neighbors
             
             input_feature_train_final , target_feature_train_final = smt.fit_resample(transformed_input_train_feature,target_feature_train_df)
             
@@ -84,8 +91,4 @@ class DataTransformation:
             )
         
         except Exception as e:
-            print(e)
             raise CustomException(e,sys)
-
-# object = DataTransformation()
-# print(object.initiate_data_transformation())
