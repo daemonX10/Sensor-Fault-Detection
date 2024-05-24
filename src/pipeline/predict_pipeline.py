@@ -15,6 +15,7 @@ class PredicationFileDetails:
     predication_output_dirname : str= "predications"
     predication_file_name:str = "predication_file.csv"
     predication_file_path:str = os.path.join(predication_output_dirname,predication_file_name)
+    predication_file_text:str = ""
 
 class PredicationPipeline:
     def __init__(self,request):
@@ -41,10 +42,10 @@ class PredicationPipeline:
             #     dest_file_name = 'model.pkl'
             #                             )
             
-            model_path = '../../artifacts/model.pkl'
+            model_path = os.path.join(os.path.dirname(__file__), '../../artifacts/model.pkl')
             model = load_object(file_path=model_path)
             
-            preds = model.predic(features)
+            preds = model.predict(features)
             return preds
         except Exception as e:
             raise CustomException (e,sys)
@@ -58,6 +59,11 @@ class PredicationPipeline:
             target_column_mapping = {0:'negative',1:'positive'}
             
             input_dataframe[predication_column_name] = input_dataframe[predication_column_name].map(target_column_mapping)
+            
+            positive = input_dataframe[predication_column_name] == 'positive'
+            negative = input_dataframe[predication_column_name] == 'negative'
+            
+            self.predication_file_detail.predication_file_text = f"Good : {positive.sum()} , Bad : {negative.sum()}"
             
             os.makedirs(self.predication_file_detail.predication_output_dirname,exist_ok=True)
             
