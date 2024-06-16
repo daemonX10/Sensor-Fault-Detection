@@ -34,6 +34,20 @@ class PredicationPipeline:
         except Exception as e:
             raise CustomException(e,sys)
     
+    def select_and_fill_features(self,features, df_required_feature):
+    # Convert features to DataFrame for easier manipulation
+        df_features = pd.DataFrame(features, columns=df_required_feature)
+
+        # Remove extra columns
+        df_features = df_features[df_required_feature]
+
+        # Fill missing values with median
+        for column in df_features.columns:
+            if df_features[column].isnull().any():
+                df_features[column].fillna(df_features[column].median(), inplace=True)
+
+        return df_features
+    
     def predict(self,features):
         try:
             # model_path = download_model(
@@ -41,6 +55,8 @@ class PredicationPipeline:
             #     bucket_file_name="model.pkl",
             #     dest_file_name = 'model.pkl'
             #                             )
+            df_required_feature = ["Sensor-" + str(i) for i in range(1, 591)]
+            features = self.select_and_fill_features(features, df_required_feature)
             
             model_path = os.path.join(os.path.dirname(__file__), '../../artifacts/model.pkl')
             model = load_object(file_path=model_path)
