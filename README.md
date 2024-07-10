@@ -24,6 +24,13 @@ The Sensor Fault Detection system is designed to monitor sensors and detect any 
 - Easy to deploy with Docker
 
 ## View the project
+[video](https://drive.google.com/file/d/1yFZVNLQHuSQu5vOkE71K8dMvUH8G5rd4/view?usp=sharing)
+
+<img src="./img/home page sensor.png" alt="Your Image" width="1000" height="500">
+<img src="./img/page 2 sensor.png" alt="Your Image" width="1000" height="500">
+<img src="./img/page 3 sensor.png" alt="Your Image" width="1000" height="500">
+<img src="./img/page 4 sensor.png" alt="Your Image" width="1000" height="500")
+
 
 <img src="./img/home page sensor.png" alt="Your Image" width="1000" height="500">
 <img src="./img/page 2 sensor.png" alt="Your Image" width="1000" height="500">
